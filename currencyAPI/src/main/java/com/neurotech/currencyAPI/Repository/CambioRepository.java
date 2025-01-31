@@ -17,4 +17,7 @@ public interface CambioRepository extends JpaRepository<Cambio, Date> {
 
     @Query("SELECT c FROM Cambio c WHERE c.dataCambio >= ?1 AND c.dataCambio <= ?2")
     Optional<List<Cambio>> findCambioBetweenDates(Date startDate, Date endDate);
+
+    @Query("SELECT c From Cambio c WHERE c.dataCambio = (SELECT MAX(d.dataCambio) FROM Cambio d)")
+    Optional<Cambio> getLatestCambio();
 }

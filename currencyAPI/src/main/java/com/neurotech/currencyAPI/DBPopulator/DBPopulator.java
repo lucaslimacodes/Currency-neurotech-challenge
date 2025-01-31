@@ -33,11 +33,11 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
                 .queryParam("$format", "json")
                 .build()
                 .toUriString();
-        System.out.println(url);
+
         CotacaoResponse response = template.getForObject(url, CotacaoResponse.class);
 
         saveAllInstancesFromResponse(response);
-        
+
     }
 
     private void saveAllInstancesFromResponse(CotacaoResponse response){
@@ -47,15 +47,6 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
             cambio.setCotacaoCompra(1.0f/cotacao.getCotacaoCompra());
             cambio.setCotacaoVenda(1.0f/cotacao.getCotacaoVenda());
 
-//            //day
-//            String strDate = cotacao.getDataCotacao().substring(8,10) + '/';
-//
-//            //month
-//            strDate+=cotacao.getDataCotacao().substring(5,7) + '/';
-//
-//            //year
-//            strDate+= cotacao.getDataCotacao().substring(0,4);
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String strDate = cotacao.getDataCotacao();
             strDate = strDate.substring(0,11);
@@ -63,7 +54,6 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
             Date date = null;
             try{
                 date = sdf.parse(strDate);
-                System.out.println(date.toString());
                 cambio.setDataCambio(date);
                 cambioRepository.save(cambio);
 
