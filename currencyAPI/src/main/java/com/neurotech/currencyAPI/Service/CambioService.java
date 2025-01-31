@@ -34,17 +34,7 @@ public class CambioService {
         }
         else{
             List<Cambio> cambios =  cambioList.get();
-//            for(int i=0;i<cambios.size()-1;i++){
-//                Date date1 = cambios.get(i).getDataCambio();
-//                Date date2 = cambios.get(i+1).getDataCambio();
-//                if(DateUtils.isDifferenceBiggerThanOneDay(date1, date2)){
-//                    cambios.add(i+1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
-//                }
-//
-//            }
-//            return cambios;
             return fillGapsOfInterval(cambios, startDate, endDate);
-
         }
     }
 
