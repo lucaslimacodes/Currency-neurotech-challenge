@@ -34,15 +34,46 @@ public class CambioService {
         }
         else{
             List<Cambio> cambios =  cambioList.get();
-            for(int i=0;i<cambios.size()-1;i++){
-                Date date1 = cambios.get(i).getDataCambio();
-                Date date2 = cambios.get(i+1).getDataCambio();
-                if(DateUtils.isDifferenceBiggerThanOneDay(date1, date2)){
-                    cambios.add(i+1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
-                }
+//            for(int i=0;i<cambios.size()-1;i++){
+//                Date date1 = cambios.get(i).getDataCambio();
+//                Date date2 = cambios.get(i+1).getDataCambio();
+//                if(DateUtils.isDifferenceBiggerThanOneDay(date1, date2)){
+//                    cambios.add(i+1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
+//                }
+//
+//            }
+//            return cambios;
+            return fillGapsOfInterval(cambios, startDate, endDate);
 
-            }
-            return cambios;
         }
+    }
+
+    private List<Cambio> fillGapsOfInterval(List<Cambio> cambios, Date startDate, Date endDate){
+
+        // checking boundaries
+
+        // beginning of list
+        while(DateUtils.isDifferenceBiggerOrEqualOneDay(startDate, cambios.get(0).getDataCambio())){
+            Date currentInitialDate = cambios.get(0).getDataCambio();
+            cambios.addFirst(new Cambio(DateUtils.yesterday(currentInitialDate), 0,0));
+        }
+
+        // end of the list
+        while(DateUtils.isDifferenceBiggerOrEqualOneDay(cambios.getLast().getDataCambio(), endDate)){
+            Date currentFinalDate = cambios.getLast().getDataCambio();
+            cambios.addLast(new Cambio(DateUtils.tomorrow(currentFinalDate), 0,0));
+        }
+
+        // checking middle of list
+
+        for(int i=0;i<cambios.size()-1;i++){
+            Date date1 = cambios.get(i).getDataCambio();
+            Date date2 = cambios.get(i+1).getDataCambio();
+            if(DateUtils.isDifferenceBiggerThanOneDay(date1, date2)){
+                cambios.add(i+1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
+            }
+        }
+
+        return cambios;
     }
 }

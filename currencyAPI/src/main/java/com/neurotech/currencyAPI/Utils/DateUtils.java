@@ -11,10 +11,23 @@ public class DateUtils {
         return differenceDias > 1;
     }
 
+    public static boolean isDifferenceBiggerOrEqualOneDay(Date date1, Date date2){
+        long differenceMillis = Math.abs(date2.getTime() - date1.getTime());
+        long differenceDias = TimeUnit.MILLISECONDS.toDays(differenceMillis);
+        return differenceDias >= 1;
+    }
+
     public static Date tomorrow(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.DAY_OF_MONTH, 1);  // Adiciona 1 dia
+        calendar.add(Calendar.DAY_OF_MONTH, 1);  // add 1 day
+        return calendar.getTime();
+    }
+
+    public static Date yesterday(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);  // removes 1 day
         return calendar.getTime();
     }
 }

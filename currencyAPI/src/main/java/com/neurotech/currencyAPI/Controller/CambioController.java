@@ -3,6 +3,9 @@ package com.neurotech.currencyAPI.Controller;
 import com.neurotech.currencyAPI.Exception.CambioNotFoundException;
 import com.neurotech.currencyAPI.Service.CambioService;
 import com.neurotech.currencyAPI.model.Cambio;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,11 @@ public class CambioController {
     @Autowired
     private CambioService cambioService;
 
+    @Operation(description = "Gets most recent currency rate in database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The most recent currency rate is returned successfully"),
+            @ApiResponse(responseCode = "404", description = "Error finding most recent currency rate, probably empty bd")
+    })
     @GetMapping("/latest")
     public ResponseEntity<Cambio> getLatest(){
         Cambio cambio = null;
@@ -32,6 +40,13 @@ public class CambioController {
 
     }
 
+    @Operation(description = "Returns all currency rates between an interval.\n " +
+            "If the database from which the data is retrieved has gaps, it is automatically filled with instances containing rates with 0's ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All rates between the interval was returned  successfully"),
+            @ApiResponse(responseCode = "404", description = "No instances of currency rates between interval in database"),
+            @ApiResponse(responseCode = "400", description = "Date format is incorrect, trying to insert future date or order is incorrect")
+    })
     @GetMapping("/interval")
     public ResponseEntity<List<Cambio>> getInterval(@RequestParam(name = "start date(yyyy-MM-dd)") String startDate, @RequestParam(name = "end date(yyyy-MM-dd)") String endDate){
         List<Cambio> cambioList = null;
@@ -44,6 +59,11 @@ public class CambioController {
             end = Date.valueOf(endDate);
         } catch (Exception e) {
             return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+
+        Date today = new Date(System.currentTimeMillis());
+        if(start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
         try{

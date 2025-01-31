@@ -18,18 +18,27 @@ import java.util.Optional;
 @Component
 public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
 
+    // Date from which the database will be filled witH
+    //'MM-dd-yyyy'
+    private final String startDate = "'01-01-2010'";
+
     @Autowired
     private CambioRepository cambioRepository;
 
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event){
+        Date today = new Date(System.currentTimeMillis());
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+        String endDate = sdf.format(today);
+        endDate = "'" + endDate + "'";
+
         RestTemplate template = new RestTemplate();
         String url = UriComponentsBuilder.newInstance()
                 .scheme("https")
                 .host("olinda.bcb.gov.br")
                 .path("/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)")
-                .queryParam("@dataInicial", "'01-01-2022'")
-                .queryParam("@dataFinalCotacao", "'01-01-2023'")
+                .queryParam("@dataInicial", startDate)
+                .queryParam("@dataFinalCotacao", endDate)
                 .queryParam("$format", "json")
                 .build()
                 .toUriString();
