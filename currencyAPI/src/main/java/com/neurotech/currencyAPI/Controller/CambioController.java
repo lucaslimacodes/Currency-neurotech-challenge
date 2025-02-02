@@ -1,6 +1,7 @@
 package com.neurotech.currencyAPI.Controller;
 
 import com.neurotech.currencyAPI.Exception.CambioNotFoundException;
+import com.neurotech.currencyAPI.Exception.DateNotValidException;
 import com.neurotech.currencyAPI.Service.CambioService;
 import com.neurotech.currencyAPI.model.Cambio;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
+
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 @RestController
 public class CambioController {
@@ -29,14 +31,8 @@ public class CambioController {
     })
     @GetMapping("/latest")
     public ResponseEntity<Cambio> getLatest(){
-        Cambio cambio = null;
-        try{
-            cambio = cambioService.getLatestCambio();
-        }
-        catch (CambioNotFoundException e){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(cambio, HttpStatus.OK);
+        Cambio latest = cambioService.getLatestCambio();
+        return new ResponseEntity<>(latest, HttpStatus.OK);
 
     }
 
@@ -48,30 +44,8 @@ public class CambioController {
             @ApiResponse(responseCode = "400", description = "Date format is incorrect, trying to insert future date or order is incorrect")
     })
     @GetMapping("/interval")
-    public ResponseEntity<List<Cambio>> getInterval(@RequestParam(name = "start date(yyyy-MM-dd)") String startDate, @RequestParam(name = "end date(yyyy-MM-dd)") String endDate){
-        List<Cambio> cambioList = null;
-
-        Date start = null;
-        Date end = null;
-
-        try{
-            start = Date.valueOf(startDate);
-            end = Date.valueOf(endDate);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
-        }
-
-        Date today = new Date(System.currentTimeMillis());
-        if(start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-
-        try{
-            cambioList = cambioService.getCambioInterval(start, end);
-        }catch (CambioNotFoundException e){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<List<Cambio>> getInterval(@RequestParam(name = "start date(yyyy-MM-dd)") String startDate, @RequestParam(name = "end date(yyyy-MM-dd)") String endDate) {
+        List<Cambio> cambioList = cambioService.getCambioInterval(startDate, endDate);
         return new ResponseEntity<>(cambioList, HttpStatus.OK);
     }
 }

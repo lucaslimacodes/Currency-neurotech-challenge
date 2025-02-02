@@ -1,6 +1,7 @@
 package com.neurotech.currencyAPI.Service;
 
 import com.neurotech.currencyAPI.Exception.CambioNotFoundException;
+import com.neurotech.currencyAPI.Exception.DateNotValidException;
 import com.neurotech.currencyAPI.Repository.CambioRepository;
 import com.neurotech.currencyAPI.model.Cambio;
 import net.bytebuddy.dynamic.DynamicType;
@@ -60,9 +61,9 @@ public class CambioServiceTest {
 
     @Test
     @DisplayName("Should retrieve a list of Cambio between an interval")
-    void getCambioIntervalSuccess() throws CambioNotFoundException {
+    void getCambioIntervalSuccess() throws CambioNotFoundException, DateNotValidException {
         setupCambioIntervalMock();
-        List<Cambio> cambios = cambioService.getCambioInterval(new GregorianCalendar(2024, 0, 1).getTime(), new GregorianCalendar(2024, 0, 10).getTime());
+        List<Cambio> cambios = cambioService.getCambioInterval("2024-01-01", "2024-01-10");
 
         Assertions.assertThat(cambios).isNotNull();
         Assertions.assertThat(cambios.size()).isEqualTo(10);
@@ -70,14 +71,14 @@ public class CambioServiceTest {
 
     @Test
     @DisplayName("Should fill empty gaps when returning Cambio instances")
-    void getCambioIntervalSuccessWithGapsFilled() throws CambioNotFoundException{
+    void getCambioIntervalSuccessWithGapsFilled() throws CambioNotFoundException, DateNotValidException{
         List<Cambio> cambioWithGaps = new ArrayList<>();
         for(int i=1;i<=30;i+=2){
             cambioWithGaps.add(new Cambio(new GregorianCalendar(2024, Calendar.JANUARY,i).getTime(),1,1));
         }
         Mockito.when(cambioRepository.findCambioBetweenDates(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Optional.of(cambioWithGaps));
 
-        List<Cambio> cambios = cambioService.getCambioInterval(new GregorianCalendar(2024, 0, 1).getTime(), new GregorianCalendar(2024, 0, 30).getTime());
+        List<Cambio> cambios = cambioService.getCambioInterval("2024-01-01",  "2024-01-30");
         Assertions.assertThat(cambios).isNotNull().isNotEmpty();
         Assertions.assertThat(cambios.size()).isEqualTo(30);
         for(int i=1;i<=30;i++){
@@ -94,4 +95,5 @@ public class CambioServiceTest {
             }
         }
     }
+
 }

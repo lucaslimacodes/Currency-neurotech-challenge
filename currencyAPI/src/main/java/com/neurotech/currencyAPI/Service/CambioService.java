@@ -1,12 +1,15 @@
 package com.neurotech.currencyAPI.Service;
 
 import com.neurotech.currencyAPI.Exception.CambioNotFoundException;
+import com.neurotech.currencyAPI.Exception.DateNotValidException;
 import com.neurotech.currencyAPI.Repository.CambioRepository;
 import com.neurotech.currencyAPI.Utils.DateUtils;
+import com.neurotech.currencyAPI.Utils.Pair;
 import com.neurotech.currencyAPI.model.Cambio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +30,41 @@ public class CambioService {
         }
     }
 
-    public List<Cambio> getCambioInterval(Date startDate, Date endDate) throws CambioNotFoundException {
-        Optional<List<Cambio>> cambioList = cambioRepository.findCambioBetweenDates(startDate, endDate);
+    public List<Cambio> getCambioInterval(String startDate, String endDate) throws CambioNotFoundException, DateNotValidException {
+        Pair<Date,Date> datesConverted = validateDateString(startDate,endDate);
+        Date start = datesConverted.getFirst();
+        Date end = datesConverted.getSecond();
+        Optional<List<Cambio>> cambioList = cambioRepository.findCambioBetweenDates(start, end);
         if(cambioList.isEmpty() || cambioList.get().isEmpty()){
             throw new CambioNotFoundException("cambio list is empty");
         }
         else{
             List<Cambio> cambios =  cambioList.get();
-            return fillGapsOfInterval(cambios, startDate, endDate);
+            return fillGapsOfInterval(cambios, start, end);
         }
+    }
+
+    private Pair<Date,Date> validateDateString(String startDate, String endDate) throws DateNotValidException{
+        Date start = null;
+        Date end = null;
+
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            start = sdf.parse(startDate);
+            end = sdf.parse(endDate);
+
+        }catch (Exception e){
+            throw new DateNotValidException("Date format is not valid");
+        }
+
+        Date today = new Date(System.currentTimeMillis());
+        if(start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0){
+            throw new DateNotValidException("Date format is valid but the interval isn`t");
+        }
+
+        return new Pair<>(start,end);
+
+
     }
 
     private List<Cambio> fillGapsOfInterval(List<Cambio> cambios, Date startDate, Date endDate){
