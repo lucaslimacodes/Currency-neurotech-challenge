@@ -22,74 +22,74 @@ public class CambioService {
 
     public Cambio getLatestCambio() throws CambioNotFoundException {
         Optional<Cambio> latestCambio = cambioRepository.getLatestCambio();
-        if(latestCambio.isEmpty()){
+        if (latestCambio.isEmpty()) {
             throw new CambioNotFoundException("latest cambio was not found");
-        }
-        else{
+        } else {
             return latestCambio.get();
         }
     }
 
-    public List<Cambio> getCambioInterval(String startDate, String endDate) throws CambioNotFoundException, DateNotValidException {
-        Pair<Date,Date> datesConverted = validateDateString(startDate,endDate);
+    public List<Cambio> getCambioInterval(String startDate, String endDate) throws CambioNotFoundException,
+            DateNotValidException {
+        Pair<Date, Date> datesConverted = validateDateString(startDate, endDate);
         Date start = datesConverted.getFirst();
         Date end = datesConverted.getSecond();
         Optional<List<Cambio>> cambioList = cambioRepository.findCambioBetweenDates(start, end);
-        if(cambioList.isEmpty() || cambioList.get().isEmpty()){
+        if (cambioList.isEmpty() || cambioList.get().isEmpty()) {
             throw new CambioNotFoundException("cambio list is empty");
-        }
-        else{
-            List<Cambio> cambios =  cambioList.get();
+        } else {
+            List<Cambio> cambios = cambioList.get();
             return fillGapsOfInterval(cambios, start, end);
         }
     }
 
-    private Pair<Date,Date> validateDateString(String startDate, String endDate) throws DateNotValidException{
+    private Pair<Date, Date> validateDateString(String startDate, String endDate) throws DateNotValidException {
         Date start = null;
         Date end = null;
 
-        try{
+        try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            sdf.setLenient(false);
             start = sdf.parse(startDate);
             end = sdf.parse(endDate);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new DateNotValidException("Date format is not valid");
         }
 
         Date today = new Date(System.currentTimeMillis());
-        if(start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0){
+        if (start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0) {
             throw new DateNotValidException("Date format is valid but the interval isn`t");
         }
 
-        return new Pair<>(start,end);
+        return new Pair<>(start, end);
 
 
     }
 
-    private List<Cambio> fillGapsOfInterval(List<Cambio> cambios, Date startDate, Date endDate){
+    private List<Cambio> fillGapsOfInterval(List<Cambio> cambios, Date startDate, Date endDate) {
 
         // checking boundaries
 
         // beginning of list
-        while(DateUtils.isDifferenceBiggerOrEqualOneDay(startDate, cambios.get(0).getDataCambio())){
+        while (DateUtils.isDifferenceBiggerOrEqualOneDay(startDate, cambios.get(0).getDataCambio())) {
             Date currentInitialDate = cambios.get(0).getDataCambio();
-            cambios.addFirst(new Cambio(DateUtils.yesterday(currentInitialDate), 0,0));
+            cambios.addFirst(new Cambio(DateUtils.yesterday(currentInitialDate), 0, 0));
         }
 
         // end of the list
-        while(DateUtils.isDifferenceBiggerOrEqualOneDay(cambios.getLast().getDataCambio(), endDate)){
+        while (DateUtils.isDifferenceBiggerOrEqualOneDay(cambios.getLast().getDataCambio(), endDate)) {
             Date currentFinalDate = cambios.getLast().getDataCambio();
-            cambios.addLast(new Cambio(DateUtils.tomorrow(currentFinalDate), 0,0));
+            cambios.addLast(new Cambio(DateUtils.tomorrow(currentFinalDate), 0, 0));
         }
 
         // checking middle of list
 
-        for(int i=0;i<cambios.size()-1;i++){
+        for (int i = 0; i < cambios.size() - 1; i++) {
             Date date1 = cambios.get(i).getDataCambio();
-            Date date2 = cambios.get(i+1).getDataCambio();
-            if(DateUtils.isDifferenceBiggerThanOneDay(date1, date2)){
-                cambios.add(i+1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
+            Date date2 = cambios.get(i + 1).getDataCambio();
+            if (DateUtils.isDifferenceBiggerThanOneDay(date1, date2)) {
+                cambios.add(i + 1, new Cambio(DateUtils.tomorrow(date1), 0, 0));
             }
         }
 

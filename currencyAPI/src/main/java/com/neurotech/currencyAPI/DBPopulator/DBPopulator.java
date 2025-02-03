@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
@@ -26,7 +25,7 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
     private CambioRepository cambioRepository;
 
     @Override
-    public void onApplicationEvent(final ApplicationReadyEvent event){
+    public void onApplicationEvent(final ApplicationReadyEvent event) {
         Date today = new Date(System.currentTimeMillis());
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
         String endDate = sdf.format(today);
@@ -36,7 +35,8 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
         String url = UriComponentsBuilder.newInstance()
                 .scheme("https")
                 .host("olinda.bcb.gov.br")
-                .path("/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)")
+                .path("/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial," +
+                        "dataFinalCotacao=@dataFinalCotacao)")
                 .queryParam("@dataInicial", startDate)
                 .queryParam("@dataFinalCotacao", endDate)
                 .queryParam("$format", "json")
@@ -49,31 +49,29 @@ public class DBPopulator implements ApplicationListener<ApplicationReadyEvent> {
 
     }
 
-    private void saveAllInstancesFromResponse(CotacaoResponse response){
+    private void saveAllInstancesFromResponse(CotacaoResponse response) {
         List<Cambio> cambioList = new ArrayList<>();
-        for(Cotacao cotacao : response.getCotacoes()){
+        for (Cotacao cotacao : response.getCotacoes()) {
             Cambio cambio = new Cambio();
-            cambio.setCotacaoCompra(1.0f/cotacao.getCotacaoCompra());
-            cambio.setCotacaoVenda(1.0f/cotacao.getCotacaoVenda());
+            cambio.setCotacaoCompra(1.0f / cotacao.getCotacaoCompra());
+            cambio.setCotacaoVenda(1.0f / cotacao.getCotacaoVenda());
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String strDate = cotacao.getDataCotacao();
-            strDate = strDate.substring(0,11);
+            strDate = strDate.substring(0, 11);
 
             Date date = null;
-            try{
+            try {
                 date = sdf.parse(strDate);
                 cambio.setDataCambio(date);
                 cambioRepository.save(cambio);
 
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 System.out.println("Date convertion failed");
                 System.exit(1);
             }
         }
     }
-
 
 
 }
