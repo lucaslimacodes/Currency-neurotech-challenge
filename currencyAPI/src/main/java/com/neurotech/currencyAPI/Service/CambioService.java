@@ -29,8 +29,9 @@ public class CambioService {
         }
     }
 
-    public List<Cambio> getCambioInterval(String startDate, String endDate) throws CambioNotFoundException,
-            DateNotValidException {
+    public List<Cambio> getCambioInterval(String startDate, String endDate) throws CambioNotFoundException, DateNotValidException {
+
+        // validate and return dates
         Pair<Date, Date> datesConverted = validateDateString(startDate, endDate);
         Date start = datesConverted.getFirst();
         Date end = datesConverted.getSecond();
@@ -39,6 +40,7 @@ public class CambioService {
             throw new CambioNotFoundException("cambio list is empty");
         } else {
             List<Cambio> cambios = cambioList.get();
+            // filling gaps with both cotacaoCompra and cotacaoVenda set to 0
             return fillGapsOfInterval(cambios, start, end);
         }
     }
@@ -57,6 +59,7 @@ public class CambioService {
             throw new DateNotValidException("Date format is not valid");
         }
 
+        // checking if none of these dates are seeking for future dates and checking if startDate < endDate
         Date today = new Date(System.currentTimeMillis());
         if (start.compareTo(today) > 0 || end.compareTo(today) > 0 || start.compareTo(end) > 0) {
             throw new DateNotValidException("Date format is valid but the interval isn`t");
@@ -69,7 +72,7 @@ public class CambioService {
 
     private List<Cambio> fillGapsOfInterval(List<Cambio> cambios, Date startDate, Date endDate) {
 
-        // checking boundaries
+        // checking and filling boundaries
 
         // beginning of list
         while (DateUtils.isDifferenceBiggerOrEqualOneDay(startDate, cambios.get(0).getDataCambio())) {
@@ -83,7 +86,7 @@ public class CambioService {
             cambios.addLast(new Cambio(DateUtils.tomorrow(currentFinalDate), 0, 0));
         }
 
-        // checking middle of list
+        // middle of list
 
         for (int i = 0; i < cambios.size() - 1; i++) {
             Date date1 = cambios.get(i).getDataCambio();

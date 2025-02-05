@@ -78,7 +78,7 @@ public class CambioControllerTest {
     }
 
     @Test
-    @DisplayName("Should return Bad request the the date format is invalid")
+    @DisplayName("Should return 404 if there is no Cambio returned from service")
     void getCambioIntervalFail() throws Exception {
         Mockito.when(cambioService.getCambioInterval(ArgumentMatchers.any(), ArgumentMatchers.any())).thenThrow(new CambioNotFoundException("cambio list is empty"));
 

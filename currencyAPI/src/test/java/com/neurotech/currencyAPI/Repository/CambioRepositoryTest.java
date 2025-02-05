@@ -32,7 +32,6 @@ public class CambioRepositoryTest {
 
         Assertions.assertThat(cambioRepository.getLatestCambio().isPresent()).isTrue();
         Assertions.assertThat(cambioRepository.getLatestCambio().get()).isEqualTo(newCambio);
-        ;
 
     }
 
@@ -46,6 +45,7 @@ public class CambioRepositoryTest {
     @Test
     @DisplayName("Should return at least one instance that is between a certain interval")
     void getCambiosIntervalSuccess() {
+        // filling db with 10 Cambio objects from January the 1st to January the 10th
         for (int i = 1; i <= 10; i++) {
             Cambio cambio = new Cambio(new GregorianCalendar(2024, Calendar.JANUARY, i).getTime(), 1, 1);
             entityManager.persist(cambio);
@@ -58,9 +58,10 @@ public class CambioRepositoryTest {
         Assertions.assertThat(result.isPresent()).isTrue();
         Assertions.assertThat(result.get().size()).isEqualTo(5);
         for (int i = 1; i <= 5; i++) {
-            Assertions.assertThat(result.get().get(i - 1).getDataCambio()).hasDayOfMonth(i);
+            Assertions.assertThat(result.get().get(i - 1).getDataCambio()).hasDayOfMonth(i); // checking if days are correct
         }
 
+        // checking when the dates are equal, only one value is returned
         result = cambioRepository.findCambioBetweenDates(date1, date1);
         Assertions.assertThat(result.isPresent()).isTrue();
         Assertions.assertThat(result.get().size()).isEqualTo(1);
@@ -69,6 +70,7 @@ public class CambioRepositoryTest {
         date1 = new GregorianCalendar(2023, Calendar.DECEMBER, 1).getTime();
         date2 = new GregorianCalendar(2024, Calendar.JANUARY, 30).getTime();
 
+        // checking the whole database
         result = cambioRepository.findCambioBetweenDates(date1, date2);
         Assertions.assertThat(result.isPresent()).isTrue();
         Assertions.assertThat(result.get().size()).isEqualTo(10);

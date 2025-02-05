@@ -54,7 +54,6 @@ public class CambioServiceTest {
     @Test
     @DisplayName("Should throw an exception if there is no instance of Cambio")
     void getLatestCambioFail() {
-        setupLatestCambioMock();
         Mockito.when(cambioRepository.getLatestCambio()).thenReturn(Optional.empty());
 
         Assertions.assertThatExceptionOfType(CambioNotFoundException.class).isThrownBy(()
@@ -76,21 +75,25 @@ public class CambioServiceTest {
     void getCambioIntervalSuccessWithGapsFilled() throws CambioNotFoundException, DateNotValidException {
         List<Cambio> cambioWithGaps = new ArrayList<>();
         for (int i = 1; i <= 30; i += 2) {
+            // filling list with gaps
             cambioWithGaps.add(new Cambio(new GregorianCalendar(2024, Calendar.JANUARY, i).getTime(), 1, 1));
         }
         Mockito.when(cambioRepository.findCambioBetweenDates(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(Optional.of(cambioWithGaps));
 
+        // checking if gaps were inserted
         List<Cambio> cambios = cambioService.getCambioInterval("2024-01-01", "2024-01-30");
         Assertions.assertThat(cambios).isNotNull().isNotEmpty();
         Assertions.assertThat(cambios.size()).isEqualTo(30);
         for (int i = 1; i <= 30; i++) {
             Cambio cambio = cambios.get(i - 1);
             if (i % 2 == 0) {
+                // inserted gaps
                 Assertions.assertThat(cambio.getDataCambio()).hasDayOfMonth(i).hasYear(2024);
                 Assertions.assertThat(cambio.getCotacaoVenda()).isZero();
                 Assertions.assertThat(cambio.getCotacaoCompra()).isZero();
             } else {
+                // original data
                 Assertions.assertThat(cambio.getDataCambio()).hasDayOfMonth(i).hasYear(2024);
                 Assertions.assertThat(cambio.getCotacaoVenda()).isNotZero();
                 Assertions.assertThat(cambio.getCotacaoCompra()).isNotZero();
@@ -112,10 +115,10 @@ public class CambioServiceTest {
     @DisplayName("Should throw an exception when the at least one date is invalid")
     void getCambioIntervalInvalidDate() {
         Assertions.assertThatExceptionOfType(DateNotValidException.class).isThrownBy(()
-                -> cambioService.getCambioInterval("10-10-2010", "12-12-2011"));
+                -> cambioService.getCambioInterval("10-10-2010", "12-12-2011")); // wrong format
 
         Assertions.assertThatExceptionOfType(DateNotValidException.class).isThrownBy(()
-                -> cambioService.getCambioInterval("2022-01-30", "2022-01-01"));
+                -> cambioService.getCambioInterval("2022-01-30", "2022-01-01")); // start > end
     }
 
 }
