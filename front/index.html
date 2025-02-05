@@ -9,19 +9,16 @@
 <body>
     <h2>Gráfico de Cotações</h2>
 
-    <!-- Seção para entrada do valor em reais -->
     <div>
         <label for="valorReais">Valor em Reais:</label>
         <input type="number" id="valorReais" step="0.01" placeholder="Digite um valor em reais">
         
         <button id="converter" onclick="converterValor()">Converter</button>
         
-        <!-- Exibição dos resultados da conversão -->
         <p id="resultadoCompra">Valor em Cotação de Compra: USD$ 0,00</p>
         <p id="resultadoVenda">Valor em Cotação de Venda: USD$ 0,00</p>
     </div>
 
-    <!-- Seção para seleção das datas -->
     <div>
         <label for="startDate">Data Inicial:</label>
         <input type="date" id="startDate">
@@ -32,13 +29,10 @@
         <button onclick="buscarDados()">Buscar</button>
     </div>
 
-    <!-- Canvas para o gráfico -->
     <canvas id="grafico"></canvas>
 
-    <!-- Inclusão do Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Inclusão do script personalizado -->
     <script src="script.js"></script>
 </body>
 </html>

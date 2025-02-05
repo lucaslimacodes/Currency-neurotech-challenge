@@ -48,8 +48,8 @@ async function converterValor() {
     try {
         const { compra, venda } = await obterCotacaoAtual();
 
-        const valorCompra = valorReais * compra; // Valor em outra moeda com cotação de compra
-        const valorVenda = valorReais * venda; // Valor em outra moeda com cotação de venda
+        const valorCompra = valorReais * compra;
+        const valorVenda = valorReais * venda; 
 
         document.getElementById('resultadoCompra').textContent = `Valor em Cotação de Compra: US$ ${valorCompra}`;
         document.getElementById('resultadoVenda').textContent = `Valor em Cotação de Venda: US$ ${valorVenda}`;
